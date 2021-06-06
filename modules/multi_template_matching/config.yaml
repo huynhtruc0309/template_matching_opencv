@@ -1,0 +1,30 @@
+mtm_opencv:
+  module: modules.multi_template_matching.multi_template_matching
+  name: MultiTemplateMatching
+  MultiTemplateMatching:
+    input_page: 2
+    template_folder: 'templates'
+    templates:
+      page_2:
+        area_3:
+          page: '2'
+          label: '11'
+          template: '33195-page2.jpg'
+        area_3_1:
+          label: '12'
+          template: '14.NN- 30849 BS0 CPP-page2.jpg'
+        area_3_2:
+          label: '13'
+          template: '20.NN-33407-page2.jpg'
+        area_3_3:
+          label: '16'
+          template: '33195-page2.jpg'
+      page_3:
+        area_Date:
+          label: '5'
+          template: '33195-page2.jpg'
+    N_object: 1
+    method: 5
+    maxOverlap: 0.8
+
+    
