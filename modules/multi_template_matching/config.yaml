@@ -2,29 +2,40 @@ mtm_opencv:
   module: modules.multi_template_matching.multi_template_matching
   name: MultiTemplateMatching
   MultiTemplateMatching:
-    input_page: 2
-    template_folder: 'templates'
+    input_page: '''3_CPP_Date'''
+    template_folder: '''templates'''
     templates:
-      page_2:
-        area_3:
-          page: '2'
-          label: '11'
-          template: '33195-page2.jpg'
-        area_3_1:
-          label: '12'
-          template: '14.NN- 30849 BS0 CPP-page2.jpg'
-        area_3_2:
-          label: '13'
-          template: '20.NN-33407-page2.jpg'
-        area_3_3:
-          label: '16'
-          template: '33195-page2.jpg'
-      page_3:
-        area_Date:
-          label: '5'
-          template: '33195-page2.jpg'
+      1_CPP_Page1:
+        - label: '1'
+          name: '33195-page2.jpg'
+        - label: '2'
+          name: '1. NN-34241-page1.jpg'
+        - label: '5'
+          name: '33195-page2.jpg'
+        - label: '6'
+          name: '33060-page1.jpg'
+        - label: '23'
+          name: 'VN-15477-12-CPP1665CV30.8.2019-page1.jpg'
+        - label: '24'
+          name: '35.NN-34242-page1.jpg'
+        - label: '26'
+          name: '33060-page1.jpg'
+      2_CPP_Page2:
+        - label: '11'
+          name: '33195-page2.jpg'
+        - label: '12'
+          name: '14.NN- 30849 BS0 CPP-page2.jpg'
+        - label: '13'
+          name: '20.NN-33407-page2.jpg'
+        - label: '16'
+          name: '33195-page2.jpg'
+      3_CPP_Date:
+        - label: '5'
+          name: '33199-page4.jpg'
+      4_CPP_Composition:
+        - label: '1'
+          name: '33409-page6.jpg'
     N_object: 1
     method: 5
     maxOverlap: 0.8
-
     
