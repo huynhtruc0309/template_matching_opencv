@@ -2,16 +2,17 @@ mtm_opencv:
   module: modules.multi_template_matching.multi_template_matching
   name: MultiTemplateMatching
   MultiTemplateMatching:
-    input_page: '''3_CPP_Date'''
+    input_page: '''2_CPP_Page2'''
     template_folder: '''templates'''
+    split_number: 3
     templates:
       1_CPP_Page1:
         - label: '1'
-          name: '33195-page2.jpg'
+          name: '33020-page1.jpg'
         - label: '2'
           name: '1. NN-34241-page1.jpg'
         - label: '5'
-          name: '33195-page2.jpg'
+          name: '33060-page1.jpg'
         - label: '6'
           name: '33060-page1.jpg'
         - label: '23'
