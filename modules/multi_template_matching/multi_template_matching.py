@@ -38,8 +38,45 @@ class MultiTemplateMatching(object):
             score += Hit['Score'][0]
 
         return score/float(len(tiles))
+    
+    def template_matching(self, listTemplate, image):
+        Hits = pd.DataFrame()
+        for template in listTemplate:
+            Hit = matchTemplates(template, image, N_object=self.N_object,
+                                 method=self.method, maxOverlap=self.maxOverlap)
+            Hits = Hits.append(Hit)
+        return Hits
 
     def __call__(self, image):
+        Hits = self.template_matching(self.listTemplate, image)
+
+        for _, TemplateName, BBox, Score  in Hits.iterrows():
+            for template in self.listTemplate:
+                if template[0][0] == TemplateName:
+                    image_tem = template[0][1] # Get the image
+
+                    width = image_tem.shape[0]  // self.split_number
+                    height = image_tem.shape[1] // self.split_number
+                    splited_template = [[(TemplateName, image_tem[x : x+width,y : y+height])]
+                                        for x in range(0, image_tem.shape[0], width) 
+                                        for y in range(0, image_tem.shape[1], height)]
+
+                    x, y, h, W = BBox
+                    splitedHits = self.template_matching(splited_template, image)
+
+                    score = splitedHits['Score'].mean()
+
+        for i, template in enumerate(self.listTemplate):
+            image_tem = template[0][1] # Get the image
+            width = image_tem.shape[0]  // self.split_number
+            height = image_tem.shape[1] // self.split_number
+            splited_template = [[(template[0][0], image_tem[x : x+width,y : y+height])]
+                                 for x in range(0, image_tem.shape[0], width) 
+                                 for y in range(0, image_tem.shape[1], height)]
+            
+            splitedHits = self.template_matching(splited_template, image[])
+
+        score = 0.0
         Hits = pd.DataFrame()
         for template in self.listTemplate:
             Hit = matchTemplates(template, image, N_object=self.N_object,
