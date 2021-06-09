@@ -5,7 +5,7 @@ import cv2
 import numpy as np
 import pandas as pd
 class MultiTemplateMatching(object):
-    def __init__(self, input_page, template_folder, templates, N_object, method, maxOverlap, split_number):
+    def __init__(self, input_page, template_folder, templates, N_object, method, maxOverlap):
         super(MultiTemplateMatching, self).__init__()
         self.input_page = input_page
         self.template_folder = template_folder
@@ -13,7 +13,8 @@ class MultiTemplateMatching(object):
         self.N_object = N_object
         self.method = method
         self.maxOverlap = maxOverlap
-        self.split_number = split_number
+        # self.split_height = split_height
+        # self.split_width = split_width
         self.listTemplate = self.load_templates()
 
     def load_templates(self):
@@ -25,66 +26,53 @@ class MultiTemplateMatching(object):
             template = [(template['label'], image)]
             listTemplate.append(template)
         return listTemplate
-
-    def matching_splited_template(self, template, image, k=3):
-        width = template.shape[0]//k
-        height = template.shape[1]//k
-        tiles = [template[x:x+width,y:y+height] for x in range(0,template.shape[0],width) for y in range(0,template.shape[1],height)]
-
-        score = 0.0
-        for tile in tiles:
-            Hit = matchTemplates(tile, image, N_object=self.N_object,
-                                 method=self.method, maxOverlap=self.maxOverlap)
-            score += Hit['Score'][0]
-
-        return score/float(len(tiles))
     
     def template_matching(self, listTemplate, image):
         Hits = pd.DataFrame()
         for template in listTemplate:
             Hit = matchTemplates(template, image, N_object=self.N_object,
                                  method=self.method, maxOverlap=self.maxOverlap)
-            Hits = Hits.append(Hit)
+            Hits = Hits.append(Hit, ignore_index=True)
+        
         return Hits
 
-    def __call__(self, image):
+    def __call__(self, image, split_height, split_width, thres_score):
         Hits = self.template_matching(self.listTemplate, image)
-
-        for _, TemplateName, BBox, Score  in Hits.iterrows():
+        
+        # print(Hits)
+        # Overlay = drawBoxesOnRGB(image, Hits, showLabel=True)
+        # cv2.imshow('BBox', cv2.resize(Overlay, (0,0), fx=0.5, fy=0.5))
+        # cv2.waitKey()
+        # cv2.destroyAllWindows()
+        
+        for index, row in Hits.iterrows():
+            TemplateName, BBox = row['TemplateName'], row['BBox']
+            
+            # Find the template to split
             for template in self.listTemplate:
                 if template[0][0] == TemplateName:
                     image_tem = template[0][1] # Get the image
 
-                    width = image_tem.shape[0]  // self.split_number
-                    height = image_tem.shape[1] // self.split_number
+                    width = image_tem.shape[0]  // split_height
+                    height = image_tem.shape[1] // split_width
                     splited_template = [[(TemplateName, image_tem[x : x+width,y : y+height])]
-                                        for x in range(0, image_tem.shape[0], width) 
+                                        for x in range(0, image_tem.shape[0], width)
                                         for y in range(0, image_tem.shape[1], height)]
 
-                    x, y, h, W = BBox
-                    splitedHits = self.template_matching(splited_template, image)
-
+                    x, y, h, w = BBox
+                    splitedHits = self.template_matching(splited_template, image[y:y+w, x:x+h])
+                    
+                    # print(splitedHits)
                     score = splitedHits['Score'].mean()
+                    if score < thres_score:
+                        Hits.drop(index, inplace=True)
+                    else:
+                        Hits.loc[index, 'Score'] = score
+                    
+                    # Overlay = drawBoxesOnRGB(image[y:y+w, x:x+h], splitedHits, showLabel=True, boxColor=(255, 0, 0))
+                    # cv2.imshow('splitedHits', Overlay)
+                    # cv2.waitKey()
+        
+        cv2.destroyAllWindows()
 
-        for i, template in enumerate(self.listTemplate):
-            image_tem = template[0][1] # Get the image
-            width = image_tem.shape[0]  // self.split_number
-            height = image_tem.shape[1] // self.split_number
-            splited_template = [[(template[0][0], image_tem[x : x+width,y : y+height])]
-                                 for x in range(0, image_tem.shape[0], width) 
-                                 for y in range(0, image_tem.shape[1], height)]
-            
-            splitedHits = self.template_matching(splited_template, image[])
-
-        score = 0.0
-        Hits = pd.DataFrame()
-        for template in self.listTemplate:
-            Hit = matchTemplates(template, image, N_object=self.N_object,
-                                 method=self.method, maxOverlap=self.maxOverlap)
-            print(Hit['BBox'])
-            x, y, h, w = Hit['BBox'][0]
-            score = self.matching_splited_template(template, image[y:y+w, x:x+h], self.split_number)
-            print(score)
-            Hits = Hits.append(Hit)
-            
         return Hits
